@@ -10,18 +10,7 @@ else # file exists, with ENV_VAR_HELPER present
   env_var_helper_data = JSON.parse(serialized_env_var_helper_data)
   raise "Expected Array object" unless env_var_helper_data.is_a? Array
 
-  env_var_helper_data.delete_if {|entry| entry['container_destination'] == container_destination}
-
-  File.open("#{env_file}.new", 'w') do |file|
-    File.readlines(env_file).each do |env_line|
-      if env_line =~ /^ENV_VAR_HELPER=/
-        file.puts "ENV_VAR_HELPER=#{env_var_helper_data.to_json}"
-      else
-        file.puts env_line
-      end
-    end
-  end
-
-  File.delete(env_file)
-  File.rename("#{env_file}.new", env_file)
+  entry = env_var_helper_data.find{|entry| entry['container_destination'] == container_destination}
+  raise "No entry found for #{container_destination}, make sure you're providing an absolute path" if entry.nil?
+  puts entry['content']
 end
